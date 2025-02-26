@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Tetris</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -15,51 +15,57 @@
             min-height: 100vh;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
+            overflow-y: auto; /* Permitir desplazamiento vertical si es necesario */
         }
 
         .game-container {
             text-align: center;
-            padding: 20px;
+            padding: 10px;
             background: #0f0f23;
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
+            max-width: 320px; /* Limitar ancho máximo para móviles */
+            box-sizing: border-box;
         }
 
         h1 {
             color: #00ffcc;
-            font-size: 36px; /* Reducido para pantallas pequeñas */
+            font-size: 36px;
             text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
-            margin-bottom: 15px;
+            margin: 10px 0;
         }
 
         #gameCanvas {
             border: 2px solid #00ffcc;
             background: #0f0f23;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            width: 200px;
+            height: 400px;
         }
 
         .controls {
-            margin-top: 20px;
+            margin: 10px 0;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            width: 100%;
         }
 
         .control-btn {
-            width: 60px;
-            height: 60px;
-            font-size: 20px;
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
             color: #fff;
             background: linear-gradient(45deg, #ff007a, #00ffcc);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            touch-action: manipulation; /* Evita zoom en móviles */
+            touch-action: manipulation;
             transition: transform 0.1s;
         }
 
@@ -68,14 +74,14 @@
         }
 
         #startButton {
-            margin-top: 10px;
-            padding: 15px 30px;
-            font-size: 16px;
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 14px;
             font-family: 'Press Start 2P', cursive;
             color: #fff;
             background: linear-gradient(45deg, #ff007a, #00ffcc);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -91,9 +97,9 @@
 
         @media (max-width: 600px) {
             h1 { font-size: 24px; }
-            #gameCanvas { width: 200px; height: 400px; }
-            .control-btn { width: 50px; height: 50px; font-size: 16px; }
-            #startButton { padding: 10px 20px; font-size: 14px; }
+            .game-container { padding: 5px; }
+            .control-btn { width: 45px; height: 45px; font-size: 16px; }
+            #startButton { padding: 8px 16px; font-size: 12px; }
         }
     </style>
 </head>
@@ -123,13 +129,7 @@
         const COLS = 10;
         const ROWS = 20;
         const COLORS = [
-            '#00ffcc', // Cyan (I)
-            '#ff007a', // Magenta (T)
-            '#ffd700', // Yellow (O)
-            '#00ff00', // Green (S)
-            '#ff4500', // Orange (L)
-            '#1e90ff', // Blue (J)
-            '#9400d3'  // Purple (Z)
+            '#00ffcc', '#ff007a', '#ffd700', '#00ff00', '#ff4500', '#1e90ff', '#9400d3'
         ];
 
         const SHAPES = [
@@ -326,15 +326,6 @@
             if (gameRunning) {
                 movePiece(0, 1);
                 dropCounter = 0;
-            }
-            drawGrid();
-            drawPiece();
-        });
-
-        startButton.addEventListener('click', startGame);
-    </script>
-</body>
-</html>         dropCounter = 0;
             }
             drawGrid();
             drawPiece();
