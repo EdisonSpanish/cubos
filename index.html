@@ -9,17 +9,18 @@
 
         body {
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             font-family: 'Press Start 2P', cursive;
-            overflow-y: auto; /* Permitir desplazamiento vertical si es necesario */
+            overflow-y: auto;
+            box-sizing: border-box;
         }
 
         .game-container {
-            text-align: center;
             padding: 10px;
             background: #0f0f23;
             border-radius: 15px;
@@ -28,8 +29,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 320px; /* Limitar ancho máximo para móviles */
-            box-sizing: border-box;
+            max-width: 300px; /* Ajustado para móviles */
         }
 
         h1 {
@@ -45,6 +45,7 @@
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
             width: 200px;
             height: 400px;
+            display: block; /* Asegurar que sea visible */
         }
 
         .controls {
@@ -54,12 +55,13 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
+            max-width: 200px; /* Alinear con el canvas */
         }
 
         .control-btn {
-            width: 50px;
-            height: 50px;
-            font-size: 18px;
+            width: 45px;
+            height: 45px;
+            font-size: 16px;
             color: #fff;
             background: linear-gradient(45deg, #ff007a, #00ffcc);
             border: none;
@@ -67,6 +69,7 @@
             cursor: pointer;
             touch-action: manipulation;
             transition: transform 0.1s;
+            display: inline-block; /* Forzar visibilidad */
         }
 
         .control-btn:active {
@@ -83,7 +86,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
 
         #startButton:hover {
@@ -98,7 +101,7 @@
         @media (max-width: 600px) {
             h1 { font-size: 24px; }
             .game-container { padding: 5px; }
-            .control-btn { width: 45px; height: 45px; font-size: 16px; }
+            .control-btn { width: 40px; height: 40px; font-size: 14px; }
             #startButton { padding: 8px 16px; font-size: 12px; }
         }
     </style>
@@ -110,7 +113,6 @@
         <div class="controls">
             <button class="control-btn" id="leftBtn">←</button>
             <button class="control-btn" id="rightBtn">→</button>
-            <button class="control-btn" id="rotateBtn">↻</button>
             <button class="control-btn" id="downBtn">↓</button>
         </div>
         <button id="startButton">Iniciar</button>
@@ -122,7 +124,6 @@
         const startButton = document.getElementById('startButton');
         const leftBtn = document.getElementById('leftBtn');
         const rightBtn = document.getElementById('rightBtn');
-        const rotateBtn = document.getElementById('rotateBtn');
         const downBtn = document.getElementById('downBtn');
 
         const GRID_SIZE = 20;
@@ -303,7 +304,7 @@
             drawPiece();
         });
 
-        // Controles táctiles
+        // Controles táctiles con botones
         leftBtn.addEventListener('click', () => {
             if (gameRunning) movePiece(-1, 0);
             drawGrid();
@@ -316,12 +317,6 @@
             drawPiece();
         });
 
-        rotateBtn.addEventListener('click', () => {
-            if (gameRunning) rotatePiece();
-            drawGrid();
-            drawPiece();
-        });
-
         downBtn.addEventListener('click', () => {
             if (gameRunning) {
                 movePiece(0, 1);
@@ -329,6 +324,16 @@
             }
             drawGrid();
             drawPiece();
+        });
+
+        // Rotar al tocar la pantalla (canvas)
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Evitar desplazamiento o zoom
+            if (gameRunning) {
+                rotatePiece();
+                drawGrid();
+                drawPiece();
+            }
         });
 
         startButton.addEventListener('click', startGame);
