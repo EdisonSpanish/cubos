@@ -31,9 +31,9 @@
 
         h1 {
             color: #00ffcc;
-            font-size: 48px;
+            font-size: 36px; /* Reducido para pantallas pequeñas */
             text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         #gameCanvas {
@@ -42,8 +42,33 @@
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
         }
 
-        #startButton {
+        .controls {
             margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            color: #fff;
+            background: linear-gradient(45deg, #ff007a, #00ffcc);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            touch-action: manipulation; /* Evita zoom en móviles */
+            transition: transform 0.1s;
+        }
+
+        .control-btn:active {
+            transform: scale(0.9);
+        }
+
+        #startButton {
+            margin-top: 10px;
             padding: 15px 30px;
             font-size: 16px;
             font-family: 'Press Start 2P', cursive;
@@ -63,12 +88,25 @@
         #startButton:active {
             transform: scale(0.95);
         }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 24px; }
+            #gameCanvas { width: 200px; height: 400px; }
+            .control-btn { width: 50px; height: 50px; font-size: 16px; }
+            #startButton { padding: 10px 20px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
         <h1>Tetris</h1>
         <canvas id="gameCanvas" width="200" height="400"></canvas>
+        <div class="controls">
+            <button class="control-btn" id="leftBtn">←</button>
+            <button class="control-btn" id="rightBtn">→</button>
+            <button class="control-btn" id="rotateBtn">↻</button>
+            <button class="control-btn" id="downBtn">↓</button>
+        </div>
         <button id="startButton">Iniciar</button>
     </div>
 
@@ -76,10 +114,14 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const startButton = document.getElementById('startButton');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const rotateBtn = document.getElementById('rotateBtn');
+        const downBtn = document.getElementById('downBtn');
 
-        const GRID_SIZE = 20; // Tamaño de cada bloque
-        const COLS = 10; // 10 columnas
-        const ROWS = 20; // 20 filas
+        const GRID_SIZE = 20;
+        const COLS = 10;
+        const ROWS = 20;
         const COLORS = [
             '#00ffcc', // Cyan (I)
             '#ff007a', // Magenta (T)
@@ -106,12 +148,11 @@
         let pieceColor;
         let gameRunning = false;
         let dropCounter = 0;
-        const DROP_SPEED = 1000; // Milisegundos por caída
+        const DROP_SPEED = 1000;
         let lastTime = null;
 
-        // Asegurar que el canvas tenga el tamaño correcto
-        canvas.width = COLS * GRID_SIZE; // 200px
-        canvas.height = ROWS * GRID_SIZE; // 400px
+        canvas.width = COLS * GRID_SIZE;
+        canvas.height = ROWS * GRID_SIZE;
 
         function createPiece() {
             const type = Math.floor(Math.random() * SHAPES.length);
@@ -240,6 +281,7 @@
             requestAnimationFrame(gameLoop);
         }
 
+        // Controles de teclado
         document.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
             switch (e.key) {
@@ -256,6 +298,34 @@
                 case 'ArrowUp':
                     rotatePiece();
                     break;
+            }
+            drawGrid();
+            drawPiece();
+        });
+
+        // Controles táctiles
+        leftBtn.addEventListener('click', () => {
+            if (gameRunning) movePiece(-1, 0);
+            drawGrid();
+            drawPiece();
+        });
+
+        rightBtn.addEventListener('click', () => {
+            if (gameRunning) movePiece(1, 0);
+            drawGrid();
+            drawPiece();
+        });
+
+        rotateBtn.addEventListener('click', () => {
+            if (gameRunning) rotatePiece();
+            drawGrid();
+            drawPiece();
+        });
+
+        downBtn.addEventListener('click', () => {
+            if (gameRunning) {
+                movePiece(0, 1);
+                dropCounter = 0;
             }
             drawGrid();
             drawPiece();
