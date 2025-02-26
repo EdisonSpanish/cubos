@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+            padding: 20px;
+            background: #0f0f23;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #00ffcc;
+            font-size: 48px;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+            margin-bottom: 20px;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ffcc;
+            background: #0f0f23;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        #startButton {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+            background: linear-gradient(45deg, #ff007a, #00ffcc);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #startButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 0, 122, 0.7);
+        }
+
+        #startButton:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tetris</h1>
+        <canvas id="gameCanvas" width="200" height="400"></canvas>
+        <button id="startButton">Iniciar</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
+
+        const GRID_SIZE = 20; // Tamaño de cada bloque
+        const COLS = 10; // 10 columnas
+        const ROWS = 20; // 20 filas
+        const COLORS = [
+            '#00ffcc', // Cyan (I)
+            '#ff007a', // Magenta (T)
+            '#ffd700', // Yellow (O)
+            '#00ff00', // Green (S)
+            '#ff4500', // Orange (L)
+            '#1e90ff', // Blue (J)
+            '#9400d3'  // Purple (Z)
+        ];
+
+        const SHAPES = [
+            [[1, 1, 1, 1]], // I
+            [[1, 1, 1], [0, 1, 0]], // T
+            [[1, 1], [1, 1]], // O
+            [[0, 1, 1], [1, 1, 0]], // S
+            [[1, 1, 1], [1, 0, 0]], // L
+            [[1, 1, 1], [0, 0, 1]], // J
+            [[1, 1, 0], [0, 1, 1]]  // Z
+        ];
+
+        let grid = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+        let currentPiece = null;
+        let pieceX, pieceY;
+        let pieceColor;
+        let gameRunning = false;
+        let dropCounter = 0;
+        const DROP_SPEED = 1000; // Milisegundos por caída
+        let lastTime = null;
+
+        // Asegurar que el canvas tenga el tamaño correcto
+        canvas.width = COLS * GRID_SIZE; // 200px
+        canvas.height = ROWS * GRID_SIZE; // 400px
+
+        function createPiece() {
+            const type = Math.floor(Math.random() * SHAPES.length);
+            currentPiece = SHAPES[type];
+            pieceColor = COLORS[type];
+            pieceX = Math.floor(COLS / 2) - Math.floor(currentPiece[0].length / 2);
+            pieceY = 0;
+        }
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (grid[row][col]) {
+                        ctx.fillStyle = grid[row][col];
+                        ctx.fillRect(col * GRID_SIZE, row * GRID_SIZE, GRID_SIZE - 1, GRID_SIZE - 1);
+                        ctx.strokeStyle = '#0f0f23';
+                        ctx.strokeRect(col * GRID_SIZE, row * GRID_SIZE, GRID_SIZE - 1, GRID_SIZE - 1);
+                    }
+                }
+            }
+        }
+
+        function drawPiece() {
+            ctx.fillStyle = pieceColor;
+            for (let row = 0; row < currentPiece.length; row++) {
+                for (let col = 0; col < currentPiece[row].length; col++) {
+                    if (currentPiece[row][col]) {
+                        ctx.fillRect((pieceX + col) * GRID_SIZE, (pieceY + row) * GRID_SIZE, GRID_SIZE - 1, GRID_SIZE - 1);
+                        ctx.strokeStyle = '#0f0f23';
+                        ctx.strokeRect((pieceX + col) * GRID_SIZE, (pieceY + row) * GRID_SIZE, GRID_SIZE - 1, GRID_SIZE - 1);
+                    }
+                }
+            }
+        }
+
+        function collide() {
+            for (let row = 0; row < currentPiece.length; row++) {
+                for (let col = 0; col < currentPiece[row].length; col++) {
+                    if (currentPiece[row][col]) {
+                        const newY = pieceY + row;
+                        const newX = pieceX + col;
+                        if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && grid[newY][newX])) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function merge() {
+            for (let row = 0; row < currentPiece.length; row++) {
+                for (let col = 0; col < currentPiece[row].length; col++) {
+                    if (currentPiece[row][col]) {
+                        grid[pieceY + row][pieceX + col] = pieceColor;
+                    }
+                }
+            }
+        }
+
+        function clearLines() {
+            for (let row = ROWS - 1; row >= 0; row--) {
+                if (grid[row].every(cell => cell !== 0)) {
+                    grid.splice(row, 1);
+                    grid.unshift(Array(COLS).fill(0));
+                }
+            }
+        }
+
+        function rotatePiece() {
+            const rotated = currentPiece[0].map((_, index) => 
+                currentPiece.map(row => row[index]).reverse()
+            );
+            const oldPiece = currentPiece;
+            currentPiece = rotated;
+            if (collide()) {
+                currentPiece = oldPiece;
+            }
+        }
+
+        function movePiece(dx, dy) {
+            pieceX += dx;
+            pieceY += dy;
+            if (collide()) {
+                pieceX -= dx;
+                pieceY -= dy;
+                if (dy > 0) {
+                    merge();
+                    clearLines();
+                    createPiece();
+                    if (collide()) {
+                        gameRunning = false;
+                        alert('¡Juego terminado!');
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function gameLoop(timestamp) {
+            if (!gameRunning) return;
+
+            if (!lastTime) lastTime = timestamp;
+            dropCounter += timestamp - lastTime;
+            lastTime = timestamp;
+
+            if (dropCounter >= DROP_SPEED) {
+                movePiece(0, 1);
+                dropCounter = 0;
+            }
+
+            drawGrid();
+            drawPiece();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            if (gameRunning) return;
+            grid = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+            createPiece();
+            gameRunning = true;
+            dropCounter = 0;
+            lastTime = null;
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            switch (e.key) {
+                case 'ArrowLeft':
+                    movePiece(-1, 0);
+                    break;
+                case 'ArrowRight':
+                    movePiece(1, 0);
+                    break;
+                case 'ArrowDown':
+                    movePiece(0, 1);
+                    dropCounter = 0;
+                    break;
+                case 'ArrowUp':
+                    rotatePiece();
+                    break;
+            }
+            drawGrid();
+            drawPiece();
+        });
+
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>
