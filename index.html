@@ -120,6 +120,7 @@
             <button class="control-btn" id="leftBtn">←</button>
             <button class="control-btn" id="rightBtn">→</button>
             <button class="control-btn" id="downBtn">↓</button>
+            <button class="control-btn" id="rotateBtn">↻</button> <!-- Nuevo botón -->
         </div>
         <button id="startButton">Iniciar</button>
         <audio id="gameAudio" controls loop>
@@ -135,6 +136,7 @@
         const leftBtn = document.getElementById('leftBtn');
         const rightBtn = document.getElementById('rightBtn');
         const downBtn = document.getElementById('downBtn');
+        const rotateBtn = document.getElementById('rotateBtn'); // Nuevo botón
         const gameAudio = document.getElementById('gameAudio');
 
         const GRID_SIZE = 20;
@@ -291,7 +293,7 @@
             gameRunning = true;
             dropCounter = 0;
             lastTime = null;
-            gameAudio.play(); // Iniciar la música al comenzar el juego
+            gameAudio.play();
             requestAnimationFrame(gameLoop);
         }
 
@@ -337,6 +339,14 @@
             }
             drawGrid();
             drawPiece();
+        });
+
+        rotateBtn.addEventListener('click', () => { // Evento para el botón de rotar
+            if (gameRunning) {
+                rotatePiece();
+                drawGrid();
+                drawPiece();
+            }
         });
 
         // Rotar al tocar la pantalla (canvas)
