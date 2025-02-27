@@ -29,7 +29,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 300px; /* Ajustado para móviles */
+            max-width: 300px;
         }
 
         h1 {
@@ -45,7 +45,7 @@
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
             width: 200px;
             height: 400px;
-            display: block; /* Asegurar que sea visible */
+            display: block;
         }
 
         .controls {
@@ -55,7 +55,7 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
-            max-width: 200px; /* Alinear con el canvas */
+            max-width: 200px;
         }
 
         .control-btn {
@@ -69,7 +69,7 @@
             cursor: pointer;
             touch-action: manipulation;
             transition: transform 0.1s;
-            display: inline-block; /* Forzar visibilidad */
+            display: inline-block;
         }
 
         .control-btn:active {
@@ -98,6 +98,12 @@
             transform: scale(0.95);
         }
 
+        #gameAudio {
+            margin: 10px 0;
+            width: 100%;
+            max-width: 200px;
+        }
+
         @media (max-width: 600px) {
             h1 { font-size: 24px; }
             .game-container { padding: 5px; }
@@ -116,6 +122,10 @@
             <button class="control-btn" id="downBtn">↓</button>
         </div>
         <button id="startButton">Iniciar</button>
+        <audio id="gameAudio" controls loop>
+            <source src="music.mp3" type="audio/mpeg">
+            Tu navegador no soporta el elemento de audio.
+        </audio>
     </div>
 
     <script>
@@ -125,6 +135,7 @@
         const leftBtn = document.getElementById('leftBtn');
         const rightBtn = document.getElementById('rightBtn');
         const downBtn = document.getElementById('downBtn');
+        const gameAudio = document.getElementById('gameAudio');
 
         const GRID_SIZE = 20;
         const COLS = 10;
@@ -247,6 +258,7 @@
                     createPiece();
                     if (collide()) {
                         gameRunning = false;
+                        gameAudio.pause();
                         alert('¡Juego terminado!');
                     }
                 }
@@ -279,6 +291,7 @@
             gameRunning = true;
             dropCounter = 0;
             lastTime = null;
+            gameAudio.play(); // Iniciar la música al comenzar el juego
             requestAnimationFrame(gameLoop);
         }
 
@@ -328,7 +341,7 @@
 
         // Rotar al tocar la pantalla (canvas)
         canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Evitar desplazamiento o zoom
+            e.preventDefault();
             if (gameRunning) {
                 rotatePiece();
                 drawGrid();
